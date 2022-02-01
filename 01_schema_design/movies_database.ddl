@@ -1,53 +1,55 @@
 -- Расширения для генерации UUID
-CREATE EXTENSION "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Cхема 'content' 
 CREATE SCHEMA IF NOT EXISTS content;
 
 -- Таблица 'Кинопроизведения'
 CREATE TABLE IF NOT EXISTS content.film_work (
-    id uuid PRIMARY KEY,
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     title TEXT NOT NULL,
     description TEXT,
     creation_date DATE,
     rating FLOAT,
     type TEXT NOT NULL,
-    created TIMESTAMP WITH TIME ZONE,
-    modified TIMESTAMP WITH TIME ZONE
+    created TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    modified TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Таблица 'Жанры'
 CREATE TABLE IF NOT EXISTS content.genre (
-    id uuid PRIMARY KEY,
-    name TEXT NOT NULL,
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL UNIQUE,
     description TEXT,
-    created TIMESTAMP WITH TIME ZONE,
-    modified TIMESTAMP WITH TIME ZONE
+    created TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    modified TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Таблица 'Персонажи'
 CREATE TABLE IF NOT EXISTS content.person (
-    id uuid PRIMARY KEY,
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     full_name TEXT NOT NULL,
-    created TIMESTAMP WITH TIME ZONE,
-    modified TIMESTAMP WITH TIME ZONE
+    created TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    modified TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Таблица 'Жанры фильма'
 CREATE TABLE IF NOT EXISTS content.genre_film_work (
-    id uuid PRIMARY KEY,
-    genre_id uuid NOT NULL,
-    film_work_id uuid NOT NULL,
-    created TIMESTAMP WITH TIME ZONE
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    genre_id uuid NOT NULL REFERENCES content.genre ON DELETE CASCADE,
+    film_work_id uuid NOT NULL REFERENCES content.film_work ON DELETE CASCADE,
+    created TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE (genre_id, film_work_id)
 );
 
 -- Таблица 'Персонажи фильма'
 CREATE TABLE IF NOT EXISTS content.person_film_work (
-    id uuid PRIMARY KEY,
-    person_id uuid NOT NULL,
-    film_work_id uuid NOT NULL,
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    person_id uuid NOT NULL REFERENCES content.person ON DELETE CASCADE,
+    film_work_id uuid NOT NULL REFERENCES content.film_work ON DELETE CASCADE,
     role TEXT NOT NULL,
-    created TIMESTAMP WITH TIME ZONE
+    created TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE (person_id, film_work_id, role)
 );
 
 
