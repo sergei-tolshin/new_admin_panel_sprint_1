@@ -49,10 +49,11 @@ class SQLiteLoader(object):
     def load_movies(self):
         data = {}
         for table in self.tables:
-            if self.tableclasses.get(table):
-                data[table] = {"packets": [], "count_rows": self.count(table)}
-                packets = self.read(table, self.packet_size)
-                for packet in packets:
-                    data[table]["packets"].append(
-                        [self.tableclasses[table](*_) for _ in packet])
+            if not self.tableclasses.get(table):
+                continue
+            data[table] = {"packets": [], "count_rows": self.count(table)}
+            packets = self.read(table, self.packet_size)
+            for packet in packets:
+                data[table]["packets"].append(
+                    [self.tableclasses[table](*_) for _ in packet])
         return data

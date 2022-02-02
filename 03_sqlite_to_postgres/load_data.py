@@ -1,6 +1,7 @@
 import argparse
 import logging
 import sqlite3
+from contextlib import closing
 
 import psycopg2
 from psycopg2.extensions import connection as _connection
@@ -42,7 +43,8 @@ if __name__ == '__main__':
            'port': args.port
            }
     try:
-        with sqlite3.connect(args.sldb) as sqlite_conn, psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn:
+        with closing(sqlite3.connect(args.sldb)) as sqlite_conn, \
+                closing(psycopg2.connect(**dsl, cursor_factory=DictCursor)) as pg_conn:
             load_from_sqlite(sqlite_conn, pg_conn)
     except sqlite3.Error:
         log.exception('SQLite')
@@ -50,6 +52,3 @@ if __name__ == '__main__':
         log.exception('PostgreSQL')
     except Exception:
         log.exception('load_from_sqlite')
-    finally:
-        sqlite_conn.close()
-        pg_conn.close()

@@ -3,8 +3,6 @@ from dataclasses import asdict
 
 import psycopg2.extras
 
-
-logging.basicConfig(filename="logger.log", level=logging.INFO)
 log = logging.getLogger()
 
 
@@ -56,13 +54,14 @@ class PostgresSaver(object):
 
     def save_all_data(self, data):
         for table in self.tables:
-            if data.get(table.name):
-                self.cursor.execute(f"TRUNCATE content.{table.name} CASCADE")
-                columns = ",".join(table.columns)
-                args = ",".join([f"%({col})s" for col in table.columns])
-                packets = data[table.name]["packets"]
-                count = data[table.name]["count_rows"]
-                for packet in packets:
-                    self.insert(table.name, columns, args, packet)
-                log.info(f"Table '{table.name}' loaded with "
-                         f"{self.count(table.name)} of {count} records")
+            if not data.get(table.name):
+                continue
+            self.cursor.execute(f"TRUNCATE content.{table.name} CASCADE")
+            columns = ",".join(table.columns)
+            args = ",".join([f"%({col})s" for col in table.columns])
+            packets = data[table.name]["packets"]
+            count = data[table.name]["count_rows"]
+            for packet in packets:
+                self.insert(table.name, columns, args, packet)
+            log.info(f"Table '{table.name}' loaded with "
+                     f"{self.count(table.name)} of {count} records")
